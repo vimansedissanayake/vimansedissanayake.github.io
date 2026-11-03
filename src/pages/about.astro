@@ -1,0 +1,94 @@
+---
+import Base from '../layouts/Base.astro';
+import Timeline from '../components/Timeline.astro';
+import { certifications, roles } from '../data/career';
+import { LINKS, SOCIALS } from '../consts';
+import { personSchema } from '../lib/schema';
+---
+
+<Base
+  title="About"
+  description="Seven years shipping production AI: agentic backends, billion-scale search, and Sri Lanka’s first humanoid robot."
+  jsonLd={personSchema(Astro.site)}
+>
+  <div class="container">
+    <header class="page-head">
+      <p class="label" data-reveal>About</p>
+      <h1 data-reveal style="--i: 1">I turn AI research into systems people rely on.</h1>
+    </header>
+
+    <div class="bio" data-reveal style="--i: 2">
+      <p>
+        I’m Vimanse, an AI engineer based in Colombo. Over seven years I’ve worked across the whole stack, from
+        embedded firmware and IoT hardware to the language and vision systems of Sri Lanka’s first humanoid robot,
+        and on to search that runs facial recognition across billions of records.
+      </p>
+      <p>
+        At SocialCatfish I led the search product behind about 80% of the company’s revenue and made it four times
+        faster. Today, at Possibl AI, I build RCRT: an agentic core that lets any application reason over its own
+        data without being tied to one model or vendor.
+      </p>
+      <p>
+        I care about performance, reliability and measurable impact, and increasingly about building companies, not
+        just systems. When I’m not engineering, I’m behind a camera.
+      </p>
+    </div>
+
+    <section class="section">
+      <div class="section-head">
+        <h2 class="label">Experience</h2>
+        <a class="label" href={LINKS.linkedin} target="_blank" rel="me noopener">LinkedIn</a>
+      </div>
+      <Timeline roles={roles} />
+    </section>
+
+    <section class="facts">
+      <div>
+        <h2 class="label">Certifications</h2>
+        <ul>{certifications.map((item) => <li>{item}</li>)}</ul>
+      </div>
+      <div>
+        <h2 class="label">Contact</h2>
+        <ul>
+          {
+            SOCIALS.map((social) => (
+              <li>
+                <a class="link" href={social.href} target="_blank" rel="me noopener">
+                  {social.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .bio {
+    display: grid;
+    gap: 1.25rem;
+    font-size: var(--text-lg);
+    line-height: 1.65;
+    color: rgb(236 235 230 / 0.88);
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: 2.5rem 2rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .facts ul {
+    margin: 0.9rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .facts li + li {
+    margin-top: 0.5rem;
+  }
+</style>

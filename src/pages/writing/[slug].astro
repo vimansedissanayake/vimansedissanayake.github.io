@@ -1,0 +1,214 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { AUTHOR, LINKS } from '../../consts';
+import { formatDate, getPosts, readingMinutes, type Post } from '../../lib/posts';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const { title, description, date, updated, tags } = post.data;
+
+const url = new URL(`/writing/${post.id}`, Astro.site);
+const image = `/og/${post.id}.png`;
+const shareOnLinkedIn = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url.href)}`;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description,
+  datePublished: date.toISOString(),
+  dateModified: (updated ?? date).toISOString(),
+  url: url.href,
+  image: new URL(image, Astro.site).href,
+  author: { '@type': 'Person', name: AUTHOR, url: Astro.site?.href, sameAs: [LINKS.linkedin] },
+  keywords: tags.join(', '),
+};
+---
+
+<Base title={title} description={description} image={image} type="article" publishedTime={date} jsonLd={jsonLd}>
+  <article class="container">
+    <header class="post-head">
+      <p class="label" data-reveal>
+        <a href="/writing" class="back">Writing</a>
+        <span aria-hidden="true"> / </span>
+        <time datetime={date.toISOString()}>{formatDate(date)}</time>
+        <span aria-hidden="true"> · </span>
+        {readingMinutes(post)} min read
+      </p>
+      <h1 data-reveal style="--i: 1">{title}</h1>
+      <p class="lede" data-reveal style="--i: 2">{description}</p>
+    </header>
+
+    <div class="prose" data-reveal style="--i: 3">
+      <Content />
+    </div>
+
+    <footer class="post-foot">
+      <p class="muted">
+        Written by {AUTHOR}. If this was useful, the best thanks is a share.
+      </p>
+      <div class="post-foot__actions">
+        <a class="link" href={shareOnLinkedIn} target="_blank" rel="noopener">Share on LinkedIn</a>
+        <a class="link" href={LINKS.linkedin} target="_blank" rel="me noopener">Follow on LinkedIn</a>
+        <a class="link" href="/writing">All writing</a>
+      </div>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .post-head {
+    padding-top: clamp(4rem, 10vw, 7rem);
+    padding-bottom: 2.5rem;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .back {
+    transition: color 200ms var(--ease);
+  }
+
+  .back:hover {
+    color: var(--accent);
+  }
+
+  h1 {
+    margin-top: 1.25rem;
+    font-size: var(--text-2xl);
+  }
+
+  .lede {
+    margin-top: 1.25rem;
+    color: var(--muted);
+    font-size: var(--text-lg);
+    line-height: 1.55;
+  }
+
+  .post-foot {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .post-foot__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .prose {
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: rgb(236 235 230 / 0.88);
+  }
+
+  .prose > :global(* + *) {
+    margin-top: 1.4em;
+  }
+
+  .prose :global(h2) {
+    margin-top: 2.6em;
+    font-size: var(--text-xl);
+    color: var(--fg);
+  }
+
+  .prose :global(h3) {
+    margin-top: 2em;
+    font-size: var(--text-lg);
+    color: var(--fg);
+  }
+
+  .prose :global(p),
+  .prose :global(ul),
+  .prose :global(ol),
+  .prose :global(blockquote) {
+    margin-bottom: 0;
+  }
+
+  .prose :global(a) {
+    color: var(--fg);
+    text-decoration: underline;
+    text-decoration-color: var(--line-strong);
+    text-underline-offset: 3px;
+    transition: color 200ms var(--ease), text-decoration-color 200ms var(--ease);
+  }
+
+  .prose :global(a:hover) {
+    color: var(--accent);
+    text-decoration-color: var(--accent);
+  }
+
+  .prose :global(strong) {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    padding-left: 1.25em;
+  }
+
+  .prose :global(li + li) {
+    margin-top: 0.4em;
+  }
+
+  .prose :global(li::marker) {
+    color: var(--faint);
+  }
+
+  .prose :global(blockquote) {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 1.25rem;
+    border-left: 2px solid var(--accent);
+    color: var(--fg);
+    font-size: var(--text-lg);
+    line-height: 1.55;
+  }
+
+  .prose :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+
+  .prose :global(:not(pre) > code) {
+    padding: 0.15em 0.35em;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--bg-raised);
+  }
+
+  .prose :global(pre) {
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background-color: var(--bg-raised) !important;
+    overflow-x: auto;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .prose :global(img) {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+
+  .prose :global(hr) {
+    margin-block: 3em;
+    border: 0;
+    border-top: 1px solid var(--line);
+  }
+</style>

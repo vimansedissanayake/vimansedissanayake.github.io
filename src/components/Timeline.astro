@@ -1,0 +1,97 @@
+---
+import type { Role } from '../data/career';
+
+interface Props {
+  roles: Role[];
+}
+
+const { roles } = Astro.props;
+---
+
+<ol class="timeline">
+  {
+    roles.map((role, i) => (
+      <li class="role" data-reveal style={`--i: ${i + 1}`}>
+        <p class="role__dates label">
+          {role.start} — {role.end}
+        </p>
+        <div class="role__body">
+          <h3>
+            {role.title} <span class="muted">· {role.company}</span>
+          </h3>
+          <p class="role__where label">{role.location}</p>
+          <p class="role__summary muted">{role.summary}</p>
+          <ul>
+            {role.highlights.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </div>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .timeline {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .role {
+    display: grid;
+    grid-template-columns: 9.5rem 1fr;
+    gap: 0.5rem 2rem;
+    padding-block: 2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .role:first-child {
+    padding-top: 0.75rem;
+    border-top: 0;
+  }
+
+  .role:first-child .role__dates {
+    color: var(--accent);
+  }
+
+  .role__dates {
+    padding-top: 0.3rem;
+    white-space: nowrap;
+  }
+
+  h3 {
+    font-size: var(--text-lg);
+    letter-spacing: -0.015em;
+  }
+
+  .role__where {
+    margin-top: 0.35rem;
+    color: var(--faint);
+  }
+
+  .role__summary {
+    margin-top: 0.9rem;
+  }
+
+  ul {
+    margin: 0.9rem 0 0;
+    padding-left: 1.1em;
+    color: rgb(236 235 230 / 0.86);
+  }
+
+  li + li {
+    margin-top: 0.45em;
+  }
+
+  ul li::marker {
+    color: var(--faint);
+  }
+
+  @media (max-width: 40rem) {
+    .role {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,106 @@
+---
+import Logo from './Logo.astro';
+import { AUTHOR, NAV } from '../consts';
+
+const path = Astro.url.pathname.replace(/\.html$/, '');
+const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
+---
+
+<header class="header">
+  <div class="container container--wide header__inner">
+    <a href="/" class="brand" aria-label={`${AUTHOR}, home`}>
+      <img class="brand__wordmark" src="/wordmark.png" width="1024" height="37" alt="" />
+      <span class="brand__mark"><Logo size={26} /></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul>
+        {
+          NAV.map((item) => (
+            <li>
+              <a href={item.href} class="label" aria-current={isActive(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    background: rgb(7 7 10 / 0.72);
+    border-bottom: 1px solid var(--line);
+    view-transition-name: site-header;
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    height: 4rem;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--fg);
+  }
+
+  .brand__wordmark {
+    width: clamp(15rem, 22vw, 18.5rem);
+    height: auto;
+    opacity: 0.92;
+    transition: opacity 200ms var(--ease);
+  }
+
+  .brand:hover .brand__wordmark {
+    opacity: 1;
+  }
+
+  .brand__mark {
+    display: none;
+  }
+
+  ul {
+    display: flex;
+    gap: clamp(1rem, 3vw, 2rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  nav a {
+    transition: color 200ms var(--ease);
+  }
+
+  nav a:hover,
+  nav a[aria-current='page'] {
+    color: var(--fg);
+  }
+
+  nav a[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 6px;
+  }
+
+  /* The wordmark is too wide to stay legible beside the nav on phones. */
+  @media (max-width: 40rem) {
+    .brand__wordmark {
+      display: none;
+    }
+
+    .brand__mark {
+      display: inline-flex;
+    }
+  }
+</style>

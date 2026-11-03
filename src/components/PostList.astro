@@ -1,0 +1,118 @@
+---
+import { formatDate, readingMinutes, type Post } from '../lib/posts';
+
+interface Props {
+  posts: Post[];
+  /** Group rows under year headings, as on the Writing index. */
+  groupByYear?: boolean;
+}
+
+const { posts, groupByYear = false } = Astro.props;
+
+const groups = groupByYear
+  ? Object.entries(
+      posts.reduce<Record<string, Post[]>>((acc, post) => {
+        const year = String(post.data.date.getUTCFullYear());
+        (acc[year] ??= []).push(post);
+        return acc;
+      }, {}),
+    ).sort(([a], [b]) => Number(b) - Number(a))
+  : [['', posts] as const];
+---
+
+{
+  posts.length === 0 ? (
+    <p class="empty muted">The first essay is in the edit. It'll be here soon.</p>
+  ) : (
+    groups.map(([year, items]) => (
+      <section class="group">
+        {year && <h2 class="label group__year">{year}</h2>}
+        <ol class="list">
+          {items.map((post) => (
+            <li>
+              <a href={`/writing/${post.id}`} class="row">
+                <span class="row__title">
+                  {post.data.title}
+                  {post.data.draft && <span class="draft label">Draft</span>}
+                </span>
+                <span class="row__meta label">
+                  {formatDate(post.data.date, 'short')} · {readingMinutes(post)} min
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))
+  )
+}
+
+<style>
+  .group + .group {
+    margin-top: 3rem;
+  }
+
+  .group__year {
+    margin-bottom: 0.5rem;
+    color: var(--faint);
+  }
+
+  .list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-block: 1.1rem;
+    border-bottom: 1px solid var(--line);
+    transition: padding 300ms var(--ease);
+  }
+
+  .row__title {
+    font-size: var(--text-lg);
+    font-weight: 450;
+    letter-spacing: -0.015em;
+    line-height: 1.35;
+    transition: color 200ms var(--ease);
+  }
+
+  .row__meta {
+    flex: none;
+    color: var(--faint);
+  }
+
+  .row:hover {
+    padding-left: 0.5rem;
+  }
+
+  .row:hover .row__title {
+    color: var(--accent);
+  }
+
+  .draft {
+    margin-left: 0.75rem;
+    padding: 0.1rem 0.4rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 2px;
+    vertical-align: middle;
+    font-size: 0.65rem;
+  }
+
+  .empty {
+    padding-block: 1.5rem;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  @media (max-width: 34rem) {
+    .row {
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+  }
+</style>

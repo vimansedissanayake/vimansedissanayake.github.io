@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro';
+import FilmCard from '../components/FilmCard.astro';
+import { getFilms } from '../data/films';
+import { LINKS } from '../consts';
+
+const [lead, ...rest] = await getFilms();
+---
+
+<Base title="Films" description="Short films and cinematography by Vimanse Dissanayake.">
+  <div class="container">
+    <header class="page-head">
+      <p class="label" data-reveal>Films</p>
+      <h1 data-reveal style="--i: 1">I build systems by day and shoot films the rest of the time.</h1>
+      <p data-reveal style="--i: 2">
+        Cinematography is how I practise patience, framing and taste, the same instincts good products need.
+      </p>
+    </header>
+  </div>
+
+  <div class="container container--wide">
+    {lead && <FilmCard film={lead} size="hero" />}
+    {
+      rest.length > 0 && (
+        <div class="grid">
+          {rest.map((film, i) => (
+            <FilmCard film={film} index={i + 1} />
+          ))}
+        </div>
+      )
+    }
+    <p class="more">
+      <a class="link" href={LINKS.youtube} target="_blank" rel="me noopener">More on YouTube</a>
+    </p>
+  </div>
+</Base>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
+    gap: clamp(2rem, 4vw, 3rem) clamp(1.25rem, 3vw, 2rem);
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  .more {
+    margin-top: 3rem;
+  }
+</style>

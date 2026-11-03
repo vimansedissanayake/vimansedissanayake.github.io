@@ -1,0 +1,56 @@
+---
+import { AUTHOR, LOCATION, SOCIALS } from '../consts';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container container--wide footer__inner">
+    <p class="label">© {year} {AUTHOR} · {LOCATION}</p>
+    <ul>
+      {
+        SOCIALS.map((social) => (
+          <li>
+            <a class="label" href={social.href} rel="me noopener" target="_blank">
+              {social.label}
+            </a>
+          </li>
+        ))
+      }
+      <li><a class="label" href="/rss.xml">RSS</a></li>
+    </ul>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+    border-top: 1px solid var(--line);
+  }
+
+  .footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    padding-block: 2rem;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    transition: color 200ms var(--ease);
+  }
+
+  a:hover {
+    color: var(--accent);
+  }
+</style>

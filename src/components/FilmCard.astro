@@ -1,0 +1,173 @@
+---
+import type { Film } from '../data/films';
+
+interface Props {
+  film: Film;
+  /** Index used for staggered entrance and slate numbering. */
+  index?: number;
+  size?: 'hero' | 'grid';
+}
+
+const { film, index = 0, size = 'grid' } = Astro.props;
+const { youtubeId, title, year, note } = film;
+const take = String(index + 1).padStart(2, '0');
+---
+
+<figure class:list={['film', `film--${size}`]} data-reveal style={`--i: ${index + 1}`}>
+  {
+    youtubeId ? (
+      <button type="button" class="frame" data-film={youtubeId} aria-label={`Play ${title}`}>
+        <img
+          src={`https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg`}
+          data-fallback={`https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`}
+          alt=""
+          loading={size === 'hero' ? 'eager' : 'lazy'}
+          decoding="async"
+        />
+        <span class="frame__play label">
+          <span class="frame__dot" aria-hidden="true" /> Play
+        </span>
+      </button>
+    ) : (
+      <div class="frame frame--slate" aria-hidden="true">
+        <span class="slate">
+          <span class="label">Take {take}</span>
+          <span class="label">{year}</span>
+        </span>
+      </div>
+    )
+  }
+  <figcaption class="caption">
+    <span class="caption__title">{title}</span>
+    <span class="label">
+      {year}
+      {note && ` · ${note}`}
+    </span>
+  </figcaption>
+</figure>
+
+<script>
+  const FRAME = 'button[data-film]';
+
+  // YouTube serves a 120px-wide grey image when a video has no maxres thumbnail.
+  for (const img of document.querySelectorAll<HTMLImageElement>(`${FRAME} img[data-fallback]`)) {
+    const useFallback = () => {
+      if (img.naturalWidth <= 120 && img.dataset.fallback) img.src = img.dataset.fallback;
+    };
+    if (img.complete) useFallback();
+    else img.addEventListener('load', useFallback, { once: true });
+  }
+
+  document.addEventListener('click', (event) => {
+    const button = (event.target as Element).closest<HTMLButtonElement>(FRAME);
+    if (!button) return;
+
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube-nocookie.com/embed/${button.dataset.film}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+    iframe.title = button.getAttribute('aria-label') ?? 'Film';
+    iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    iframe.allowFullscreen = true;
+    iframe.className = 'frame frame--playing';
+    button.replaceWith(iframe);
+  });
+</script>
+
+<style>
+  .film {
+    margin: 0;
+  }
+
+  .frame {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 2.39 / 1;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: #000;
+    cursor: pointer;
+    transition: aspect-ratio 600ms var(--ease), border-color 300ms var(--ease);
+  }
+
+  /* The player iframe is created at runtime, so it can't carry Astro's scoped attribute. */
+  :global(iframe.frame--playing) {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--line-strong);
+    border-radius: 3px;
+    background: #000;
+  }
+
+  .frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.85) brightness(0.82);
+    transform: scale(1.01);
+    transition: transform 900ms var(--ease), filter 600ms var(--ease);
+  }
+
+  .frame:hover {
+    border-color: var(--line-strong);
+  }
+
+  .frame:hover img {
+    filter: saturate(1) brightness(1);
+    transform: scale(1.04);
+  }
+
+  .frame__play {
+    position: absolute;
+    left: 1rem;
+    bottom: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--fg);
+    text-shadow: 0 1px 12px rgb(0 0 0 / 0.6);
+  }
+
+  .frame__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+  }
+
+  .frame--slate {
+    cursor: default;
+    background:
+      repeating-linear-gradient(90deg, rgb(255 255 255 / 0.025) 0 1px, transparent 1px 12.5%),
+      radial-gradient(80% 120% at 50% 0%, #15151b, #050507);
+  }
+
+  .slate {
+    position: absolute;
+    inset: auto 1rem 0.9rem;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .caption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    margin-top: 0.85rem;
+  }
+
+  .caption__title {
+    font-weight: 450;
+    letter-spacing: -0.01em;
+  }
+
+  .film--hero .caption__title {
+    font-size: var(--text-lg);
+  }
+</style>

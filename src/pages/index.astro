@@ -1,0 +1,188 @@
+---
+import Base from '../layouts/Base.astro';
+import FilmCard from '../components/FilmCard.astro';
+import PostList from '../components/PostList.astro';
+import { getFeaturedFilms } from '../data/films';
+import { proofPoints } from '../data/career';
+import { LINKS, LOCATION, SITE_HEADLINE } from '../consts';
+import { getPosts } from '../lib/posts';
+import { personSchema } from '../lib/schema';
+
+const posts = (await getPosts()).slice(0, 3);
+const featuredFilms = await getFeaturedFilms();
+---
+
+<Base jsonLd={personSchema(Astro.site)}>
+  <section class="hero container container--wide">
+    <p class="label" data-reveal>Vimanse Dissanayake · {LOCATION}</p>
+    <h1 data-reveal style="--i: 1">
+      {SITE_HEADLINE}
+      <span class="hero__aside">I also make films.</span>
+    </h1>
+    <p class="hero__intro" data-reveal style="--i: 2">
+      Seven years shipping production AI, from the language engine of Sri Lanka’s first humanoid robot to search
+      across billions of records. Today I build RCRT, an agentic backend that works with any app, vendor or model.
+    </p>
+    <nav class="hero__links" aria-label="Highlights" data-reveal style="--i: 3">
+      <a class="link" href="/writing">Read the writing</a>
+      <a class="link" href="/films">Watch the films</a>
+      <a class="link" href={LINKS.linkedin} target="_blank" rel="me noopener">LinkedIn</a>
+    </nav>
+  </section>
+
+  <section class="container container--wide" aria-label="Selected results">
+    <ul class="proof">
+      {
+        proofPoints.map((point, i) => (
+          <li data-reveal style={`--i: ${i + 4}`}>
+            <span class="proof__figure">{point.figure}</span>
+            <span class="label">{point.label}</span>
+            <p class="muted">{point.detail}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="section container container--wide">
+    <div class="section-head">
+      <h2 class="label">Latest writing</h2>
+      <a class="label" href="/writing">All writing</a>
+    </div>
+    <PostList posts={posts} />
+  </section>
+
+  <section class="section container container--wide">
+    <div class="section-head">
+      <h2 class="label">Films</h2>
+      <a class="label" href="/films">All films</a>
+    </div>
+    <div class="films">
+      {featuredFilms.map((film, i) => <FilmCard film={film} index={i} />)}
+    </div>
+  </section>
+
+  <section class="section container container--wide">
+    <div class="contact">
+      <h2>Building something in AI?</h2>
+      <p class="muted">
+        I’m always up for a conversation with founders, operators and teams working on agentic systems.
+      </p>
+      <p class="contact__links">
+        <a class="link" href={LINKS.linkedin} target="_blank" rel="me noopener">Message me on LinkedIn</a>
+        <a class="link" href="/about">More about me</a>
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-top: clamp(5rem, 14vw, 10rem);
+    padding-bottom: clamp(3.5rem, 8vw, 6rem);
+  }
+
+  h1 {
+    max-width: 18ch;
+    margin-top: 1.5rem;
+    font-size: clamp(2.6rem, 1.5rem + 4.6vw, 5.5rem);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1.02;
+  }
+
+  .hero__aside {
+    display: block;
+    margin-top: 0.15em;
+    color: var(--faint);
+  }
+
+  .hero__intro {
+    max-width: 38rem;
+    margin-top: 2rem;
+    color: var(--muted);
+    font-size: var(--text-lg);
+    line-height: 1.6;
+  }
+
+  .hero__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.75rem;
+    margin-top: 2.25rem;
+  }
+
+  .proof {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .proof li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 2rem 1.5rem 2rem 0;
+  }
+
+  .proof li + li {
+    padding-left: 1.5rem;
+    border-left: 1px solid var(--line);
+  }
+
+  .proof__figure {
+    font-size: clamp(2rem, 1.5rem + 2vw, 2.75rem);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .proof p {
+    margin-top: 0.25rem;
+    font-size: var(--text-sm);
+  }
+
+  .films {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+    gap: 2rem;
+  }
+
+  .contact {
+    padding: clamp(2rem, 5vw, 3rem);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.02), transparent);
+  }
+
+  .contact h2 {
+    font-size: var(--text-xl);
+  }
+
+  .contact p {
+    margin-top: 0.85rem;
+  }
+
+  .contact__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 1.5rem !important;
+  }
+
+  @media (max-width: 47rem) {
+    .proof li,
+    .proof li + li {
+      padding: 1.5rem 0;
+      border-left: 0;
+    }
+
+    .proof li + li {
+      border-top: 1px solid var(--line);
+    }
+  }
+</style>
